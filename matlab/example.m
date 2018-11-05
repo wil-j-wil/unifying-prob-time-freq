@@ -146,6 +146,7 @@ figure(1); clf
     plot(yKernel)
     title(sprintf('signal y (%s model)', kernel))
     
+    
 
 %%
  % Compare the energy in each frequency channel between standard model and
