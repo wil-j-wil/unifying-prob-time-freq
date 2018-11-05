@@ -133,7 +133,7 @@ figure(1); clf
   % Requesting all the outputs is memory intensive. Z only contains the (D) observable
   % dimensions. Zfull contains the higher-order terms too.
 %   ZKernel = kernel_ss_probFB(yTest,A,Q,H,Pinf,D*tau1,vary,tau1,verbose,filter_only);
-  [ZKernel, covZ, ZKernelfull, covZfull] = kernel_ss_probFB(yTest,A,Q,H,Pinf,D*tau1,vary,tau1,verbose,filter_only);
+  [ZKernel, covZ, ZKernelfull, covZfull] = kernel_ss_probFB(yTest,A,Q,H,Pinf,D*tau1,vary,tau1,verbose,filter_only,1);
   AKernel = abs(ZKernel').^2;
   yKernel = sum(real(ZKernel'),2);
 
