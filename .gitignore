@@ -1,0 +1,5 @@
+# Exclude the paper from public repo
+
+paper/
+paper.zip
+Wilkinson_2018b Unifying Probabilistic Models for Time Frequency Analysis.pdf

@@ -93,7 +93,7 @@ yTrain = yTest;
 % clean spectrogram computed here
 % ZTest = kernel_ss_probFB(yTest,Lam1,Var1,om,0);
 disp('computing signal spectrogram')
-ZTest1 = kernel_ss_probFB(yTest,A1,Q1,H1,Pinf1,K1,0,tau1);
+ZTest1 = kernel_ss_probFB(yTest,A1,Q1,H1,Pinf1,K1,0,tau1,0,0,1);
 ATest1 = abs(ZTest1').^2;
 yTest1 = sum(real(ZTest1'),2);
 

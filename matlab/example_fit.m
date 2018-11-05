@@ -52,13 +52,13 @@ yTrain = yTest;
   % Learn properties of the filters (centre frequency and width)
   opts.verbose = 1; % view plots of the fitting process
   opts.minT = 100;
-  opts.maxT = 3000;
+  opts.maxT = 1000;
   opts.numIts = 10;
   opts.numLevels = 30;
   opts.bet = 750;  % increase if filters bunch together
   opts.reassign = 0;  % set to 1 if filters really bunch together
   
-  [Var1Fit,Lam1Fit,omFit,InfoFit] = fit_probSTFT_cts(yTrain,D,kernel,opts); % trains filters to match the spectrum
+  [Var1Fit,Lam1Fit,omFit,InfoFit] = fit_probSTFT_SD(yTrain,D,kernel,opts); % trains filters to match the spectrum
 
   
  %%
@@ -76,7 +76,7 @@ yTrain = yTest;
 % clean spectrogram computed here
 % ZTest = kernel_ss_probFB(yTest,Lam1,Var1,om,0);
 disp('computing signal spectrogram')
-ZTest1 = kernel_ss_probFB(yTest,A1,Q1,H1,Pinf1,K1,0,tau1);
+ZTest1 = kernel_ss_probFB(yTest,A1,Q1,H1,Pinf1,K1,0,tau1,0,0,1);
 ATest1 = abs(ZTest1').^2;
 yTest1 = sum(real(ZTest1'),2);
 
