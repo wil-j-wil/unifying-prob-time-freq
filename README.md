@@ -1,4 +1,4 @@
-# unifying-prob-time-freq
+# Unifying probabilistic models for time frequency analysis
 
 In our paper we show equivalence between probabilistic time-frequency models (e.g. the probabilistic phase vocoder) and Spectral Mixture Gaussian processes. Therefore this code serves 3 novel purposes:
 
