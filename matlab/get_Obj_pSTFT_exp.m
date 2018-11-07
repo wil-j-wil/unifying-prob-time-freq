@@ -114,12 +114,12 @@ if nargout>1
     % Derivative wrt transformed marginal variance
     alp1_c = lam(d).^2 + (omegas-om(d)).^2;
     alp2_c = lam(d).^2 + (omegas+om(d)).^2; 
-    dspecdtransVar = (mVar(d)-minVar(d)) .* (1 - lam(d)) .* lam(d) .* (alp1_c.^-1 + alp2_c.^-1);
+    dspecdtransVar = (mVar(d)-minVar(d)) .* (1 - lam(d).^2) .* lam(d) .* (alp1_c.^-1 + alp2_c.^-1);
     dObjdtransVar(d) = sum(dObjdspec.*dspecdtransVar); 
     
     
     % Derivative wrt transformed centre frequency
-    dspecdom = 2 .* mVar(d) .* (1 - lam(d)) .* lam(d) * (alp1_c.^-2 .* (omegas-om(d)) - alp2_c.^-2 .* (omegas+om(d)));
+    dspecdom = 2 .* mVar(d) .* (1 - lam(d).^2) .* lam(d) * (alp1_c.^-2 .* (omegas-om(d)) - alp2_c.^-2 .* (omegas+om(d)));
     domdtransOm = (limOm(d,2)-limOm(d,1))*(1/4)./cosh(theta(D+d)/2).^2;
     dObjdtransOm(d) = sum(dObjdspec.*dspecdom)*domdtransOm; 
 
