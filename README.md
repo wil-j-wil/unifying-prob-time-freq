@@ -22,7 +22,8 @@ matlab/experiments/ folder allows you to rerun the missing data synthesis experi
 matlab/prob_filterbank folder contains Richard Turner's standard probabilistic time-frequency analysis code.
 
 
-Reference:
+
+# Reference:
 ```
 @article{wilkinson2018unifying,
     author = {Wilkinson, William J. and Andersen, Michael Riis and Reiss, Joshua D. and Stowell, Dan and Solin, Arno},
