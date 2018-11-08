@@ -23,12 +23,12 @@ matlab/prob_filterbank folder contains Richard Turner's standard probabilistic t
 
 
 Reference:
-
-  @article{wilkinson2018unifying,
+```
+@article{wilkinson2018unifying,
     author = {Wilkinson, William J. and Andersen, Michael Riis and Reiss, Joshua D. and Stowell, Dan and Solin, Arno},
     title = {Unifying probabilistic models for time-frequency analysis},
     journal = {ArXiv},
     volume = {1811.02489},
     year = 2018,
     }
-
+```
