@@ -1,14 +1,15 @@
 % example script for fitting a prob. time frequency model in the frequency
-% domain. Here we pre-optimise using the exponential kernel, which gives
-% much better results.
+% domain. If using a kernel other than the exponential, then see
+% example_fit_pre_opt.m which has a pre-optimisation stage and gives better
+% results.
 
 clear; close all;
 
 % filterbank code
-addpath('prob_filterbank/');
+addpath('../prob_filterbank/');
 
 % Specify where to load the data from
-soundPath = '../audio/speech/';
+soundPath = '../../audio/speech/';
 
 % load signal
 File = 'speech0_female'; % Name of file to load
@@ -17,8 +18,9 @@ fs_ = 16000; % sampling rate of file
 % DS = 1; % down sample further if requested
 D = 20; % number channels (don't set too high)
 
-kernel2 = 'matern32';
+kernel = 'exp';
 se_approx_order = 4;
+
 
 
 
@@ -42,13 +44,12 @@ yTest = yTest/normaliser; % rescale the input to unit variance
 T = length(yTest);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Pre-optimise the filter bank with exponential kernel (probabilistic phase vocoder)
+%% Train the filter bank
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 yTrain = yTest;
 
 %if trainFilter==1
   % Learn properties of the filters (centre frequency and width)
-  opts = struct;
   opts.verbose = 1; % view plots of the fitting process
   opts.minT = 100;
   opts.maxT = 1000;
@@ -57,39 +58,165 @@ yTrain = yTest;
   opts.bet = 750;  % increase if filters bunch together
   opts.reassign = 0;  % set to 1 if filters really bunch together
   
-  [Var1Fit,Lam1Fit,omFit,InfoFit1] = fit_probSTFT_SD(yTrain,D,'exp',opts); % trains filters to match the spectrum
+  [Var1Fit,Lam1Fit,omFit,InfoFit] = fit_probSTFT_SD(yTrain,D,kernel,opts); % trains filters to match the spectrum
+
   
   
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Then tune parameters with new kernel
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%if trainFilter==1
-  % Learn properties of the filters (centre frequency and width)
-  opts = struct;
-  opts.verbose = 1; % view plots of the fitting process
-  opts.minT = 500;
-  opts.maxT = 1000;
-  opts.numIts = 10;
-  opts.numLevels = 15;
-  opts.bet = 750;  % increase if filters bunch together
-  opts.reassign = 0;  % set to 1 if filters really bunch together
-  opts.bandwidth_lim = 2;  % limits the bandwidths to n times the initial values
-  
-  opts.theta_init = [Var1Fit;Lam1Fit;omFit];
-  [Var2Fit,Lam2Fit,om2Fit,InfoFit2] = fit_probSTFT_SD(yTrain,D,kernel2,opts); % trains filters to match the spectrum
+   %% Power SD
+%       minT = min(T); maxT = max(T);
+%       numFreq = floor(logspace(log10(min([minT,T])),log10(min([maxT,T])),1));
+      numFreq = 1000;
+      ovLp = floor(numFreq/10);
+     [pg,varpg] = welchMethod(yTest,numFreq,ovLp);
+      pg = pg/(1/2/numFreq(1)); % convert to power spectral density estimate
 
   
  %%
-  % plots the sprectrum of the filter
-%     figH1 = plot_pSTFT(Var1Fit,omFit,Lam1Fit,fs,1);
-    figH1 = plot_pSTFT_kern_cts(Var2Fit,om2Fit,Lam2Fit,kernel2,fs,1);
+    % plots the sprectrum of the filter
+    dfFrac = 1/20; % best results dfFrac = 1/20
+    fmax = logspace(log10(1/200),log10(0.3),D)';
+    [omega,lamx,varx] = freq2probSpec(fmax,fmax*dfFrac,ones(D,1)/D);  % lamx=psi, varx=ro
+    
+      NumPoints = 500;
+
+      freqs = linspace(0,0.5,NumPoints);
+      spec = get_pSTFT_spec(freqs,lamx,varx,omega);
+      figure(1); clf
+      hold on;
+      for d=1:D,
+        plot(freqs*fs,spec(d,:))
+      end
+
+%       plot(freqs*fs,sum(spec),'-m','linewidth',2)
+      ylim([1e-3, 150])
+      xlim([0 6000])
+      set(gca,'yscale','log')
+      xticks([])
+      yticks([])
+      box('off')
+      axis('off')
+      xlabel('frequency (Hz)')
+      ylabel('filter response (dB)')
+      legend()
+      
+      
+      matlab2tikz('../../presentation/figs/filterbank_untrained.tex', ...
+      'noSize',true, ... 
+      'relativeDataPath','./fig/', ...
+      'extraAxisOptions',{'width=\figurewidth','height=\figureheight'},...
+      'parseStrings',false, ...
+      'checkForUpdates',false)  
+      
+       figure(2); clf
+      hold on;
+      plot(linspace(0,1/2,length(pg))*fs,pg,'k')
+      for d=1:D,
+        plot(freqs*fs,spec(d,:))
+      end
+
+%       plot(freqs*fs,sum(spec),'-m','linewidth',2)
+      ylim([1e-3, 150])
+      xlim([0 6000])
+      set(gca,'yscale','log')
+      xticks([])
+      yticks([])
+      box('off')
+      axis('off')
+      xlabel('frequency (Hz)')
+      ylabel('filter response (dB)')
+      legend()
+      
+      
+      matlab2tikz('../../presentation/figs/filterbank_untrained_SD.tex', ...
+      'noSize',true, ... 
+      'relativeDataPath','./fig/', ...
+      'extraAxisOptions',{'width=\figurewidth','height=\figureheight'},...
+      'parseStrings',false, ...
+      'checkForUpdates',false)  
+  
+  
+    
+ %%
+%     figH2 = plot_pSTFT_kern_cts(Var1Fit,omFit,Lam1Fit,kernel,fs,1);
+    
+
+      pSTFT_spec_fun = str2func(strcat('get_pSTFT_spec_cts_',kernel));
+      spec = pSTFT_spec_fun(freqs,Lam1Fit,Var1Fit,omFit);
+      figure(3); clf
+      hold on;
+      for d=1:D,
+        plot(freqs*fs,spec(d,:))
+      end
+
+%       plot(freqs*fs,sum(spec),'-m','linewidth',3)
+      ylim([1e-3, 150])
+      xlim([0 6000])
+      set(gca,'yscale','log')
+      xticks([])
+      yticks([])
+      box('off')
+      axis('off')
+      xlabel('frequency (Hz)')
+      ylabel('filter response (dB)')
+      legend()
+      
+      matlab2tikz('../../presentation/figs/filterbank_trained.tex', ...
+      'noSize',true, ... 
+      'relativeDataPath','./fig/', ...
+      'extraAxisOptions',{'width=\figurewidth','height=\figureheight'},...
+      'parseStrings',false, ...
+      'checkForUpdates',false)
+  
+  
+      figure(4); clf
+      hold on;
+      plot(linspace(0,1/2,length(pg))*fs,pg,'k')
+      for d=1:D,
+        plot(freqs*fs,spec(d,:))
+      end
+
+%       plot(freqs*fs,sum(spec),'-m','linewidth',3)
+      ylim([1e-3, 150])
+      xlim([0 6000])
+      set(gca,'yscale','log')
+      xticks([])
+      yticks([])
+      box('off')
+      axis('off')
+      xlabel('frequency (Hz)')
+      ylabel('filter response (dB)')
+      legend()
+  
+      matlab2tikz('../../presentation/figs/filterbank_trained_SD.tex', ...
+      'noSize',true, ... 
+      'relativeDataPath','./fig/', ...
+      'extraAxisOptions',{'width=\figurewidth','height=\figureheight'},...
+      'parseStrings',false, ...
+      'checkForUpdates',false)  
+  
+  
+      figure(5); clf
+      hold on;
+      plot(linspace(0,1/2,length(pg))*fs,pg,'k')
+
+
+      ylim([1e-3, 150])
+      xlim([0 6000])
+      set(gca,'yscale','log')
+  
+      matlab2tikz('../../presentation/figs/power_SD.tex', ...
+      'noSize',true, ... 
+      'relativeDataPath','./fig/', ...
+      'extraAxisOptions',{'width=\figurewidth','height=\figureheight'},...
+      'parseStrings',false, ...
+      'checkForUpdates',false)  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Compute the spectrogram
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$
 
-[A1,Q1,H1,Pinf1,K1,tau1] = get_disc_model(Lam2Fit,Var2Fit,om2Fit,D,kernel2,se_approx_order);
+[A1,Q1,H1,Pinf1,K1,tau1] = get_disc_model(Lam1Fit,Var1Fit,omFit,D,kernel,se_approx_order);
 
 % clean spectrogram computed here
 % ZTest = kernel_ss_probFB(yTest,Lam1,Var1,om,0);
@@ -102,10 +229,10 @@ yTest1 = sum(real(ZTest1'),2);
     subplot(2,1,1)
     imagesc(log(ATest1)')
     set(gca,'YDir','normal')
-    title(sprintf('spectrogram of y (%s model)', kernel2))
+    title(sprintf('spectrogram of y (%s model)', kernel))
     subplot(2,1,2)
     plot(yTest1)
-    title(sprintf('signal y (%s model)', kernel2))
+    title(sprintf('signal y (%s model)', kernel))
  
 
 
@@ -224,11 +351,9 @@ plot(yTest,'Color','r')
 hold on
 plot(yGap,'b')
 title('actual signal')
-y_limits = ylim;
 subplot(2,1,2)
 plot(yRecon1,'b')
-title(sprintf('reconstruction with %s model', kernel2))
-ylim(y_limits)
+title(sprintf('reconstruction with %s model', kernel))
 
 t = linspace(1,T,T);
 ind1gap = gapPos(1)+[-ceil(gaps(L)/2):+ceil(gaps(L)/2)];
@@ -241,25 +366,19 @@ plot(t(ind1),yTest(ind1),'Color',grey)
 hold on
 plot(t(ind1gap),yTest(ind1gap), 'k')
 title('actual signal')
-y_limits = ylim;
 subplot(2,2,3)
 plot(t(ind1),yRecon1(ind1),'Color',grey)
 hold on
 plot(t(ind1gap),yRecon1(ind1gap), 'b')
-title(sprintf('reconstruction with %s model', kernel2))
-ylim(y_limits)
+title(sprintf('reconstruction with %s model', kernel))
 subplot(2,2,2)
 plot(t(ind2),yTest(ind2),'Color',grey)
 hold on
 plot(t(ind2gap),yTest(ind2gap), 'k')
 title('actual signal')
-y_limits = ylim;
 subplot(2,2,4)
 plot(t(ind2),yRecon1(ind2),'Color',grey)
 hold on
 plot(t(ind2gap),yRecon1(ind2gap), 'b')
-title(sprintf('reconstruction with %s model', kernel2))
-ylim(y_limits)
+title(sprintf('reconstruction with %s model', kernel))
 
-%%
-% sound(yRecon1*normaliser,fs)

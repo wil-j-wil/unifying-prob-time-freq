@@ -106,14 +106,15 @@ ylim([-Inf Inf])
 
 gapnum = 2;
 grey = [0.6 0.6 0.6];
-% darkgrey = [0.25 0.25 0.25];
+darkgrey = [0.35 0.35 0.35];
 t = linspace(1,length(yTest),length(yTest))*1000/fs;
 ind1gap = gapPos(gapnum)+[-ceil(gaps(L)/2):+ceil(gaps(L)/2)];
 ind1 = gapPos(gapnum)+[-2.5*ceil(gaps(L)/2):+2.5*ceil(gaps(L)/2)];
 t = t - t(ind1(1));
 normaliser = max(yTest(ind1));
 subplot(2,1,2)
-plot(t(ind1),yTest(ind1)/normaliser,'Color',grey)
+% plot(t(ind1),yTest(ind1)/normaliser,'Color',grey)
+plot(t(ind1),yTest(ind1)/normaliser,'Color',darkgrey)
 hold on
 % plot(t(ind1gap),yTest(ind1gap)/normaliser, 'Color',darkgrey)
 title('Signal Reconstruction', 'interpreter', 'Latex')
@@ -222,6 +223,7 @@ normaliser = max(yTest(ind1));
 
 figure(3); clf
 plot(t(ind1),yTest(ind1)/normaliser,'Color',grey)
+% plot(t(ind1),yTest(ind1)/normaliser,'Color',darkgrey)
 hold on
 % plot(t(ind1gap),yTest(ind1gap)/normaliser, 'Color',darkgrey)
 %title('Signal Reconstruction')

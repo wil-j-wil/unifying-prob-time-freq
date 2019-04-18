@@ -17,7 +17,7 @@ fs_ = 16000; % sampling rate of file
 % DS = 1; % down sample further if requested
 D = 20; % number channels (don't set too high)
 
-kernel2 = 'matern32';
+kernel2 = 'matern52';
 se_approx_order = 4;
 
 
@@ -73,7 +73,6 @@ yTrain = yTest;
   opts.numLevels = 15;
   opts.bet = 750;  % increase if filters bunch together
   opts.reassign = 0;  % set to 1 if filters really bunch together
-  opts.bandwidth_lim = 2;  % limits the bandwidths to n times the initial values
   
   opts.theta_init = [Var1Fit;Lam1Fit;omFit];
   [Var2Fit,Lam2Fit,om2Fit,InfoFit2] = fit_probSTFT_SD(yTrain,D,kernel2,opts); % trains filters to match the spectrum
@@ -89,7 +88,11 @@ yTrain = yTest;
 %% Compute the spectrogram
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$
 
-[A1,Q1,H1,Pinf1,K1,tau1] = get_disc_model(Lam2Fit,Var2Fit,om2Fit,D,kernel2,se_approx_order);
+[omFit, om_ind] = sort(omFit);
+Lam1Fit = Lam1Fit(om_ind);
+Var1Fit = Var1Fit(om_ind);
+% [A1,Q1,H1,Pinf1,K1,tau1] = get_disc_model(Lam2Fit,Var2Fit,om2Fit,D,kernel2,se_approx_order);
+[A1,Q1,H1,Pinf1,K1,tau1] = get_disc_model(Lam1Fit,Var1Fit,omFit,D,'exp',se_approx_order);
 
 % clean spectrogram computed here
 % ZTest = kernel_ss_probFB(yTest,Lam1,Var1,om,0);
@@ -102,10 +105,12 @@ yTest1 = sum(real(ZTest1'),2);
     subplot(2,1,1)
     imagesc(log(ATest1)')
     set(gca,'YDir','normal')
-    title(sprintf('spectrogram of y (%s model)', kernel2))
+%     title(sprintf('spectrogram of y (%s model)', kernel2))
+    title(sprintf('spectrogram of y (%s model)', 'exp'))
     subplot(2,1,2)
     plot(yTest1)
-    title(sprintf('signal y (%s model)', kernel2))
+%     title(sprintf('signal y (%s model)', kernel2))
+    title(sprintf('signal y (%s model)', 'exp'))
  
 
 
@@ -227,7 +232,8 @@ title('actual signal')
 y_limits = ylim;
 subplot(2,1,2)
 plot(yRecon1,'b')
-title(sprintf('reconstruction with %s model', kernel2))
+% title(sprintf('reconstruction with %s model', kernel2))
+title(sprintf('reconstruction with %s model', 'exp'))
 ylim(y_limits)
 
 t = linspace(1,T,T);
@@ -246,7 +252,8 @@ subplot(2,2,3)
 plot(t(ind1),yRecon1(ind1),'Color',grey)
 hold on
 plot(t(ind1gap),yRecon1(ind1gap), 'b')
-title(sprintf('reconstruction with %s model', kernel2))
+% title(sprintf('reconstruction with %s model', kernel2))
+title(sprintf('reconstruction with %s model', 'exp'))
 ylim(y_limits)
 subplot(2,2,2)
 plot(t(ind2),yTest(ind2),'Color',grey)
@@ -258,7 +265,8 @@ subplot(2,2,4)
 plot(t(ind2),yRecon1(ind2),'Color',grey)
 hold on
 plot(t(ind2gap),yRecon1(ind2gap), 'b')
-title(sprintf('reconstruction with %s model', kernel2))
+% title(sprintf('reconstruction with %s model', kernel2))
+title(sprintf('reconstruction with %s model', 'exp'))
 ylim(y_limits)
 
 %%

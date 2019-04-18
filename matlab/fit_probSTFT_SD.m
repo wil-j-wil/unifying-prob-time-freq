@@ -113,7 +113,12 @@ else
   om = theta_init(2*D+1:end);
 %   cvar_d = mVar .* (1 - lamx.^2); % conditional variance
   % convert hypers to continuous form so we can calculate spectral density
-  lam_max = min(lam_c .* 2.,1-1e-5);
+  if ~isfield(varargin{1},'bandwidth_lim')
+      bandwidth_lim = 2;
+  else
+      bandwidth_lim = varargin{1}.bandwidth_lim;
+  end
+  lam_max = min(lam_c .* bandwidth_lim,1-1e-5);
 %   lam_c = min(-log(lamx), lam_max-1e-5);
 %   cvar_c = cvar_d ./ (1 - exp(-2 .* lam_c));
   mVar_c = max(cvar_c ./ (1 - lam_c.^2),1e-3);
@@ -245,7 +250,7 @@ end
 %   [om, mVar_c, lam_c] = disc_cts_func(om, mVar, lamx);
 %   lam_c = -log(lamx);
 %   var_c = mVar ./ (1 - exp(-2 .* lam_c));
-
+% keyboard
 for c2f=1:numLevels
 
   % Estmate spectrum of y using Welch's periodogram
