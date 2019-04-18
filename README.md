@@ -2,6 +2,8 @@
 
 https://arxiv.org/abs/1811.02489
 
+Paper accepted to International Conference on Acoustics, Speech and Signal Processing (ICASSP) 2019.
+
 In our paper we show equivalence between probabilistic time-frequency models (e.g. the probabilistic phase vocoder) and Spectral Mixture Gaussian processes. Therefore this code serves 3 novel purposes:
 
 - Providing an easy way to construct more complex probabilistic time-frequency models by swapping in different kernel functions.
