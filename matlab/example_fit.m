@@ -13,10 +13,10 @@ soundPath = '../audio/speech/';
 
 % load signal
 File = 'speech0_female'; % Name of file to load
-fs_ = 16000; % sampling rate of file
+fs_ = 22050; % sampling rate of file
 
 % DS = 1; % down sample further if requested
-D = 20; % number channels (don't set too high)
+D = 30; % number channels (don't set too high)
 
 kernel = 'exp';
 se_approx_order = 4;

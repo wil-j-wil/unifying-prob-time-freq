@@ -7,7 +7,7 @@ se_approx_order = 4;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [y,fs] = audioread(File); % reads in the file
 yTest = resample(y, fs_, fs); % downsample the input
-yTest = yTest(1:min(18300,length(yTest)));  % more than 19000 takes up too much memory is Kalman smoother is used
+yTest = yTest(1:min(18300,length(yTest)));  % more than 19000 takes up too much memory if Kalman smoother is used
 fs = fs_;
 normaliser = sqrt(var(yTest));
 yTest = yTest/normaliser; % rescale the input to unit variance
